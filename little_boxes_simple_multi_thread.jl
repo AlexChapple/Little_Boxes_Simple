@@ -1,3 +1,4 @@
+using Base: Float64
 #= 
 
 Little boxes simple with first order 
@@ -9,6 +10,7 @@ approximation of the 6 differential equations.
 using LinearAlgebra
 using Plots 
 using Random
+using Base.Threads
 
 # Constants
 
@@ -88,18 +90,22 @@ function average_simulation(time_steps, end_time, num_of_simulations, Γ)
     time_list = LinRange(0,end_time,time_steps)
     h = end_time/time_steps
 
-    avg_σ_z_list = zeros(size(time_list)[1])
-    avg_σ_Lowering_list = zeros(size(time_list)[1])
-    avg_σ_Raising_list = zeros(size(time_list)[1])
+    avg_σ_z_list = Atomic{Array::Float64}(zeros(size(time_list)[1]))
+    avg_σ_Lowering_list = Atomic{Array::Float64}(zeros(size(time_list)[1]))
+    avg_σ_Raising_list = Atomic{Array::Float64}(zeros(size(time_list)[1]))
 
-    for i in 1:num_of_simulations
+    @threads for i in 1:num_of_simulations
 
         coeffs_list, σ_z_list, σ_Lowering_list, σ_Raising_list = evolve(init_condition, time_list, Γ, h)
 
         # Elementwise addition of the operator lists
-        avg_σ_z_list += σ_z_list
-        avg_σ_Lowering_list += σ_Lowering_list
-        avg_σ_Raising_list += σ_Raising_list
+        atomic_add!(avg_σ_z_list, σ_z_list)
+        atomic_add!(avg_σ_Lowering_list, σ_Lowering_list)
+        atomic_add!(avg_σ_Raising_list,σ_Raising_list)
+
+        # avg_σ_z_list += σ_z_list
+        # avg_σ_Lowering_list += σ_Lowering_list
+        # avg_σ_Raising_list += σ_Raising_list
 
         # Prints to console the number of simulations completed
         if i % 10 == 0
