@@ -111,7 +111,7 @@ function average_simulation(time_steps, end_time, num_of_simulations, Γ)
         avg_σ_Lowering_list += σ_Lowering_list
         avg_σ_Raising_list += σ_Raising_list
 
-        # Do waiting time statistics here
+        # Do waiting time statistics here 
         last_found_time = 0
 
         for q in 1:size(photon_tracking)[1]
