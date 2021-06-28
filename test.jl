@@ -1,6 +1,6 @@
 using Base.Threads
 
-print(Threads.nthreads())
+print("Number of threads: " * string(Threads.nthreads()),"\n")
 
 # acc = Ref(0)
 
@@ -21,13 +21,33 @@ print(Threads.nthreads())
 ###
 
 function test()
-    a = zeros(1,5)
 
-    @threads for i in 1:10000
-        a += [1 1 1 1 1]
+    a = zeros(Threads.nthreads(),5) 
+
+    @threads for i in 1:10000000
+        a[Threads.threadid():Threads.threadid(), :] += [1 1 1 1 1]
     end
     
-    print(a)
+    b = zeros(1,5)
+    for i in 1:Threads.nthreads()
+        b += a[i:i, :]
+    end
+
+    print(b)
+
 end
 
-test()
+function test2()
+
+    a = zeros(1,5)
+
+    for i in 1:10000000
+        a += [1 1 1 1 1]
+    end
+
+    print(a)
+
+
+end
+
+@time test()

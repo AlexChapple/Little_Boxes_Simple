@@ -19,6 +19,28 @@ function modulo(z)
     return sqrt(real(z)^2 + imag(z)^2)
 end
 
+# sum array by column 
+function sum_column(mat)
+
+    row_num, col_num = size(mat)
+
+    temp_array = zeros(col_num)
+
+    for row in 1:row_num
+
+        temp = zeros(col_num)
+
+        for col in 1:col_num
+            temp[col] = mat[row, col]
+        end
+
+        temp_array += temp
+    end
+
+    return temp_array
+
+end
+
 # Evolves one simulation 
 function evolve(init_condition::Array{ComplexF64}, time_list, Γ, h,)
 
@@ -90,18 +112,18 @@ function average_simulation(time_steps, end_time, num_of_simulations, Γ)
     time_list = LinRange(0,end_time,time_steps)
     h = end_time/time_steps
 
-    avg_σ_z_list = zeros(size(time_list)[1])
-    avg_σ_Lowering_list = zeros(size(time_list)[1])
-    avg_σ_Raising_list = zeros(size(time_list)[1])
+    avg_σ_z_list = zeros(Threads.nthreads(), size(time_list)[1])
+    avg_σ_Lowering_list = zeros(Threads.nthreads(), size(time_list)[1])
+    avg_σ_Raising_list = zeros(Threads.nthreads(), size(time_list)[1])
 
-    for i in 1:num_of_simulations
+    @threads for i in 1:num_of_simulations
 
         coeffs_list, σ_z_list, σ_Lowering_list, σ_Raising_list = evolve(init_condition, time_list, Γ, h)
 
         # Elementwise addition of the operator lists
-        avg_σ_z_list += σ_z_list
-        avg_σ_Lowering_list += σ_Lowering_list
-        avg_σ_Raising_list += σ_Raising_list
+        avg_σ_z_list[Threads.threadid(), :] += σ_z_list
+        avg_σ_Lowering_list[Threads.threadid(), :] += σ_Lowering_list
+        avg_σ_Raising_list[Threads.threadid(), :] += σ_Raising_list
 
         # Prints to console the number of simulations completed
         if i % 10 == 0
@@ -109,6 +131,11 @@ function average_simulation(time_steps, end_time, num_of_simulations, Γ)
         end
 
     end
+
+    # Process arrays
+    avg_σ_z_list = sum_column(avg_σ_z_list)
+    avg_σ_Lowering_list = sum_column(avg_σ_Lowering_list)
+    avg_σ_Raising_list = sum_column(avg_σ_Raising_list)
 
     avg_σ_z_list /= num_of_simulations
     avg_σ_Lowering_list /= num_of_simulations
@@ -196,7 +223,7 @@ function plot_results(time_list, avg_σ_z_list, avg_σ_Lowering_list, avg_σ_Rai
         plot!(time_list, analytical_solutions_list, label="analytic solution")
         xlabel!("\$\\gamma t\$")
         ylabel!("\$\\sigma_{z}\$")
-        title = "Figures/sigma_z_" * string(Γ) * ".png"
+        title = "Figures/sigma_z_multi_" * string(Γ) * ".png"
         savefig(title)
 
     elseif mode == "+"
@@ -205,7 +232,8 @@ function plot_results(time_list, avg_σ_z_list, avg_σ_Lowering_list, avg_σ_Rai
         plot!(time_list, analytical_solutions_list, label="analytic solution")
         xlabel!("\$\\gamma t\$")
         ylabel!("\$\\sigma_{+}\$")
-        savefig("figure2.png")
+        title = "Figures/sigma_+_multi_" * string(Γ) * ".png"
+        savefig(title)
 
     elseif mode == "-"
 
@@ -213,7 +241,8 @@ function plot_results(time_list, avg_σ_z_list, avg_σ_Lowering_list, avg_σ_Rai
         plot!(time_list, analytical_solutions_list, label="analytic solution")
         xlabel!("\$\\gamma t\$")
         ylabel!("\$\\sigma_{-}\$")
-        savefig("figure3.png")
+        title = "Figures/sigma_-_multi_" * string(Γ) * ".png"
+        savefig(title)
 
     end
 
@@ -221,12 +250,12 @@ end
 
 # RUN CODE
 
-time_steps = 1000
+time_steps = 10000
 end_time = 20
-num_of_simulations = 1000
+num_of_simulations = 10000
 mode = "z"
 
-Γ = 0.7
+Γ = 2.3
 
 @time time_list, avg_σ_z_list, avg_σ_Lowering_list, avg_σ_Raising_list = average_simulation(time_steps, end_time, num_of_simulations, Γ)
 analytical_solutions_list = analytical_solution(Γ, time_list, mode)

@@ -219,12 +219,12 @@ end
 
 # RUN CODE
 
-time_steps = 1000
+time_steps = 10000
 end_time = 20
-num_of_simulations = 1000
+num_of_simulations = 10000
 mode = "z"
 
-Γ = 0.7
+Γ = 2.3
 
 @time time_list, avg_σ_z_list, avg_σ_Lowering_list, avg_σ_Raising_list = average_simulation(time_steps, end_time, num_of_simulations, Γ)
 analytical_solutions_list = analytical_solution(Γ, time_list, mode)
