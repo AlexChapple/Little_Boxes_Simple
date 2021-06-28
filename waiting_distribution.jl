@@ -276,8 +276,8 @@ end
 
 time_steps = 10000
 end_time = 9
-num_of_simulations = 100000
-mode = "-"
+num_of_simulations = 10000
+mode = "z"
 
 Γ = 3.5
 
