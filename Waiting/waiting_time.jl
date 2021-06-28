@@ -93,7 +93,7 @@ function average_simulation(time_steps, end_time, num_of_simulations, Γ)
     time_list = LinRange(0,end_time,time_steps)
     h = end_time/time_steps
 
-    waiting_time_list1 = LinRange(0,end_time,1000)
+    waiting_time_list1 = LinRange(0,end_time,time_steps) # changed 1000 to time_steps but might cause issues
     waiting_time_list2 = zeros(size(waiting_time_list1))
 
     for i in 1:num_of_simulations
@@ -114,7 +114,7 @@ function average_simulation(time_steps, end_time, num_of_simulations, Γ)
 
                         waiting_time_list2[1] += 1
 
-                    elseif waiting_time >= waiting_time_list1[end-1] && waiting_time <= waiting_time_list1[500]
+                    elseif waiting_time >= waiting_time_list1[end-1] && waiting_time <= waiting_time_list1[end]
 
                         waiting_time_list2[end] += 1
 
@@ -148,6 +148,6 @@ function return_waiting_distribution(time_steps, end_time, num_of_simulations, �
 
     time_list, waiting_time_list1, waiting_time_list2 = average_simulation(time_steps, end_time, num_of_simulations, Γ)
 
-    return time_list, waiting_time_list1, waiting_time_list2
+    return waiting_time_list2
 
 end
