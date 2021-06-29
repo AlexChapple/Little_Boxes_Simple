@@ -113,7 +113,7 @@ function average_simulation(time_steps, end_time, num_of_simulations, Γ)
                 elseif time >= waiting_time_list1[end-1] && time <= waiting_time_list1[end]
                     waiting_time_list2[end] += 1
                 else
-                    for k in 2:(size(waiting_time_list1)[1])
+                    for k in 2:(size(waiting_time_list1)[1]-1)
                         if time >= waiting_time_list1[k] && time < waiting_time_list1[k+1]
                             waiting_time_list2[k] += 1
                             break
@@ -154,7 +154,7 @@ end
 
 time_steps = 10000
 end_time = 9
-num_of_simulations = 100000
+num_of_simulations = 200000
 
 Γ = 2.3
 
