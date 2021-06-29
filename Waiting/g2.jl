@@ -141,7 +141,7 @@ end
 function plot_waiting_time(waiting_time_list1, waiting_time_list2, Γ)
 
     # Needs to change dictionary to array
-    plot(waiting_time_list1, waiting_time_list2,dpi=600,legend=false)
+    plot(waiting_time_list1[1:end-10], waiting_time_list2[1:end-10],dpi=600,legend=false)
     xlabel!("γt")
     ylabel!("w(τ)")
     title!("waiting time distribution")
@@ -156,7 +156,7 @@ time_steps = 10000
 end_time = 9
 num_of_simulations = 100000
 
-Γ = 0.8
+Γ = 2.3
 
 @time time_list, waiting_time_list1, waiting_time_list2 = average_simulation(time_steps, end_time, num_of_simulations, Γ)
 plot_waiting_time(waiting_time_list1, waiting_time_list2, Γ)
