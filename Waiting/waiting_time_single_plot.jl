@@ -107,25 +107,39 @@ function average_simulation(time_steps, end_time, num_of_simulations, Γ)
         for q in 1:size(photon_tracking)[1]
 
             if photon_tracking[q] == 1 # if photon has been emitted
+                
                 waiting_time = time_list[q] - last_found_time # finds the time interval since last emission 
 
-                for k in 1:size(waiting_time_list1)[1]
-
-                    if waiting_time < waiting_time_list1[2]
-
-                        waiting_time_list2[1] += 1
-
-                    elseif waiting_time >= waiting_time_list1[end-1] && waiting_time <= waiting_time_list1[500]
-
-                        waiting_time_list2[end] += 1
-
-                    elseif waiting_time >= waiting_time_list1[k] && waiting_time <= waiting_time_list1[k+1]
-
-                        waiting_time_list2[k] += 1
-
-                    end
-
+                if waiting_time < waiting_time_list1[2]
+                    waiting_time_list2[1] += 1
+                elseif waiting_time >= waiting_time_list1[end-1] && waiting_time <= waiting_time_list1[end]
+                    waiting_time_list2[end] += 1
+                else
+                    for k in 2:(size(waiting_time_list1)[1])
+                        if waiting_time >= waiting_time_list1[k] && waiting_time < waiting_time_list1[k+1]
+                            waiting_time_list2[k] += 1
+                            break
+                        end
+                    end 
                 end
+
+                # for k in 1:size(waiting_time_list1)[1]
+
+                #     if waiting_time < waiting_time_list1[2]
+
+                #         waiting_time_list2[1] += 1
+
+                #     elseif waiting_time > waiting_time_list1[end-1] && waiting_time <= waiting_time_list1[1000]
+
+                #         waiting_time_list2[end] += 1
+
+                #     elseif waiting_time >= waiting_time_list1[k] && waiting_time <= waiting_time_list1[k+1]
+
+                #         waiting_time_list2[k] += 1
+
+                #     end
+
+                # end
 
                 last_found_time = time_list[q]
 
@@ -163,7 +177,7 @@ time_steps = 10000
 end_time = 9
 num_of_simulations = 10000
 
-Γ = 0.8
+Γ = 3.5
 
 @time time_list, waiting_time_list1, waiting_time_list2 = average_simulation(time_steps, end_time, num_of_simulations, Γ)
 plot_waiting_time(waiting_time_list1, waiting_time_list2, Γ)

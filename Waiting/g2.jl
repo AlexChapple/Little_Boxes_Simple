@@ -1,14 +1,15 @@
 #= 
 
-Waitinng time distribution made for function calling.
+Waiting time distribution code. This is for single plots only. 
 
-=# 
+=#
 
 # Importing Libraries 
 using LinearAlgebra
 using Plots 
 using Random
 
+# Constants
 
 # Methods 
 function modulo(z)
@@ -93,43 +94,40 @@ function average_simulation(time_steps, end_time, num_of_simulations, Γ)
     time_list = LinRange(0,end_time,time_steps)
     h = end_time/time_steps
 
-    waiting_time_list1 = LinRange(0,end_time,1000) # changed 1000 to time_steps but might cause issues
+    waiting_time_list1 = LinRange(0,end_time,1000)
     waiting_time_list2 = zeros(size(waiting_time_list1))
 
     for i in 1:num_of_simulations
 
         photon_tracking = evolve(init_condition, time_list, Γ, h)
 
-        # Do waiting time statistics here 
-        last_found_time = 0
-
+        # WORKING HERE
         for q in 1:size(photon_tracking)[1]
 
-            if photon_tracking[q] == 1 # if photon has been emitted
+            if photon_tracking[q] == 1 # if photon is emitted
 
-                waiting_time = time_list[q] - last_found_time # finds the time interval since last emission 
+                time = time_list[q] # Finds the time it has been found 
 
-                if waiting_time < waiting_time_list1[2]
+                if time < waiting_time_list1[2]
                     waiting_time_list2[1] += 1
-                elseif waiting_time >= waiting_time_list1[end-1] && waiting_time <= waiting_time_list1[end]
+                elseif time >= waiting_time_list1[end-1] && time <= waiting_time_list1[end]
                     waiting_time_list2[end] += 1
                 else
                     for k in 2:(size(waiting_time_list1)[1])
-                        if waiting_time >= waiting_time_list1[k] && waiting_time < waiting_time_list1[k+1]
+                        if time >= waiting_time_list1[k] && time < waiting_time_list1[k+1]
                             waiting_time_list2[k] += 1
                             break
                         end
                     end 
                 end
 
-                last_found_time = time_list[q]
-
             end
+
         end
 
-        # if i % 10 == 0
-        #     print(string(i) * "/" * string(num_of_simulations) * " Simulations Completed.\r")
-        # end
+        if i % 10 == 0
+            print(string(i) * "/" * string(num_of_simulations) * " Simulations Completed.\r")
+        end
 
     end
 
@@ -140,10 +138,28 @@ function average_simulation(time_steps, end_time, num_of_simulations, Γ)
 
 end
 
-function return_waiting_distribution(time_steps, end_time, num_of_simulations, Γ)
+function plot_waiting_time(waiting_time_list1, waiting_time_list2, Γ)
 
-    time_list, waiting_time_list1, waiting_time_list2 = average_simulation(time_steps, end_time, num_of_simulations, Γ)
-
-    return waiting_time_list2
-
+    # Needs to change dictionary to array
+    plot(waiting_time_list1, waiting_time_list2,dpi=600,legend=false)
+    xlabel!("γt")
+    ylabel!("w(τ)")
+    title!("waiting time distribution")
+    title = "Figures/g2_" * string(Γ) * ".png"
+    savefig(title)
+    
 end
+
+# RUN CODE
+
+time_steps = 10000
+end_time = 9
+num_of_simulations = 100000
+
+Γ = 0.8
+
+@time time_list, waiting_time_list1, waiting_time_list2 = average_simulation(time_steps, end_time, num_of_simulations, Γ)
+plot_waiting_time(waiting_time_list1, waiting_time_list2, Γ)
+
+
+
