@@ -1,16 +1,14 @@
-using Plots: include
 #= 
 
-Waiting time distribution code. This is for single plots only. 
+Waitinng time distribution made for function calling.
 
-=#
+=# 
 
 # Importing Libraries 
 using LinearAlgebra
 using Plots 
 using Random
 
-# Constants
 
 # Methods 
 function modulo(z)
@@ -95,74 +93,47 @@ function average_simulation(time_steps, end_time, num_of_simulations, Γ)
     time_list = LinRange(0,end_time,time_steps)
     h = end_time/time_steps
 
-    waiting_time_list1 = LinRange(0,end_time,1000)
-    waiting_time_list2 = zeros(size(waiting_time_list1))
+    photon_counting_time_list = LinRange(0,end_time,1000) # changed 1000 to time_steps but might cause issues
+    photon_counting_list = zeros(size(photon_counting_time_list))
 
     for i in 1:num_of_simulations
 
         photon_tracking = evolve(init_condition, time_list, Γ, h)
 
-        # WORKING HERE
         for q in 1:size(photon_tracking)[1]
 
             if photon_tracking[q] == 1 # if photon is emitted
 
                 time = time_list[q] # Finds the time it has been found 
 
-                if time < waiting_time_list1[2]
-                    waiting_time_list2[1] += 1
-                elseif time >= waiting_time_list1[end-1] && time <= waiting_time_list1[end]
-                    waiting_time_list2[end] += 1
+                if time < photon_counting_time_list[2]
+                    photon_counting_list[1] += 1
+                elseif time >= photon_counting_time_list[end-1] && time <= photon_counting_time_list[end]
+                photon_counting_list[end] += 1
                 else
-                    for k in 2:(size(waiting_time_list1)[1]-1)
-                        if time >= waiting_time_list1[k] && time < waiting_time_list1[k+1]
-                            waiting_time_list2[k] += 1
+                    for k in 2:(size(photon_counting_time_list)[1]-1)
+                        if time >= photon_counting_time_list[k] && time < photon_counting_time_list[k+1]
+                            photon_counting_list[k] += 1
                             break
                         end
                     end 
                 end
-
             end
-
-        end
-
-        if i % 10 == 0
-            print(string(i) * "/" * string(num_of_simulations) * " Simulations Completed.\r")
         end
 
     end
 
     # waiting_time_list = [i*h for i in waiting_time_list]
-    waiting_time_list2 /= num_of_simulations
-    # total = sum(waiting_time_list2)
-    # waiting_time_list2 /= total
+    photon_counting_list /= num_of_simulations
 
-    return time_list, waiting_time_list1, waiting_time_list2
+    return time_list, photon_counting_time_list, photon_counting_list
 
 end
 
-function plot_waiting_time(waiting_time_list1, waiting_time_list2, Γ)
+function return_waiting_distribution(time_steps, end_time, num_of_simulations, Γ)
 
-    # Needs to change dictionary to array
-    plot(waiting_time_list1[1:end-10], waiting_time_list2[1:end-10],dpi=600, label="numerical")
-    xlabel!("γt")
-    ylabel!("w(τ)")
-    title!("waiting time distribution")
-    title = "Figures/g2_" * string(Γ) * ".png"
-    savefig(title)
-    
+    time_list, photon_counting_time_list, photon_counting_list = average_simulation(time_steps, end_time, num_of_simulations, Γ)
+
+    return photon_counting_list
+
 end
-
-# RUN CODE
-
-time_steps = 10000
-end_time = 9
-num_of_simulations = 100000
-
-Γ = 3.5
-
-@time time_list, waiting_time_list1, waiting_time_list2 = average_simulation(time_steps, end_time, num_of_simulations, Γ)
-plot_waiting_time(waiting_time_list1, waiting_time_list2, Γ)
-
-
-

@@ -1,3 +1,7 @@
+#= 
+    Waiting time distribution analytical solution (Still in testing phase)
+=#
+
 using LinearAlgebra
 using Plots
 
@@ -8,7 +12,8 @@ function analytical_array(end_time, time_steps, β, Ω)
     analytical_solution = zeros(Float64, size(time_list)[1])
 
     for index in 1:size(time_list)[1]
-        analytical_solution[index] = real(analytical_distribution_equation(time_list[index], β, Ω))
+        a = analytical_distribution_equation(time_list[index], β, Ω)
+        analytical_solution[index] = real(a)
     end  
 
     return time_list, analytical_solution
@@ -36,11 +41,11 @@ function plot_analytical_solution(time_list, analytical_solution, β, Ω)
 end
 
 ### RUN CODE ###
-β = 0.5
-Ω = 2.3 * 0.5
+β = 1
+Ω = 5
 
 end_time = 9 
 time_steps = 1000
 
-time_list, analytical_solution = analytical_array(end_time, time_steps, β, Ω)
-plot_analytical_solution(time_list, analytical_solution, β, Ω)
+# time_list, analytical_solution = analytical_array(end_time, time_steps, β, Ω)
+# plot_analytical_solution(time_list, analytical_solution, β, Ω)

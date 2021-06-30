@@ -8,6 +8,7 @@ Waiting time distribution code. This is for single plots only.
 using LinearAlgebra
 using Plots 
 using Random
+include("waiting_analytical_test.jl")
 
 # Constants
 
@@ -152,17 +153,17 @@ function average_simulation(time_steps, end_time, num_of_simulations, Γ)
 
     end
 
-    # waiting_time_list = [i*h for i in waiting_time_list]
     waiting_time_list2 /= num_of_simulations
 
     return time_list, waiting_time_list1, waiting_time_list2
 
 end
 
-function plot_waiting_time(waiting_time_list1, waiting_time_list2, Γ)
+function plot_waiting_time(waiting_time_list1, waiting_time_list2, time_list, analytical_solution, Γ)
 
     # Needs to change dictionary to array
-    plot(waiting_time_list1, waiting_time_list2,dpi=600,legend=false)
+    plot(waiting_time_list1, waiting_time_list2, dpi=600, label="numerical")
+    # plot!(time_list, analytical_solution, label="analytical")
     xlabel!("γt")
     ylabel!("w(τ)")
     title!("waiting time distribution")
@@ -180,7 +181,8 @@ num_of_simulations = 10000
 Γ = 3.5
 
 @time time_list, waiting_time_list1, waiting_time_list2 = average_simulation(time_steps, end_time, num_of_simulations, Γ)
-plot_waiting_time(waiting_time_list1, waiting_time_list2, Γ)
+time_list, analytical_solution = analytical_array(end_time, time_steps, 1, Γ)
+plot_waiting_time(waiting_time_list1, waiting_time_list2, time_list, analytical_solution, Γ)
 
 
 
