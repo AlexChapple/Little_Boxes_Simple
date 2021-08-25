@@ -18,7 +18,7 @@ function modulo(z)
 end
 
 # Evolves one simulation 
-function evolve(init_condition::Array{ComplexF64}, time_list, Γ, h,)
+function evolve(init_condition::Array{ComplexF64}, time_list, Γ, h)
 
     # coeffs_list with initial condition 
     coeffs_list::Array{Array{ComplexF64}} = [init_condition]
