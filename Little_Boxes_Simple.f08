@@ -10,15 +10,15 @@ program main
 
     ! Declare general variables and parameters 
 
-    real (kind=8), parameter :: start_time = 0.0 
+    real (kind=8), parameter :: start_time = 0.0d0
     complex (kind=8), dimension(2) :: coeffs 
-    integer, parameter :: end_time = 20 
-    integer (kind=8), parameter :: time_steps = end_time * 1000
+    integer, parameter :: end_time = 20d0 
+    integer (kind=8), parameter :: time_steps = end_time * 5000d0 
     real (kind=8), parameter :: dt = real(end_time) / real(time_steps)
     real (kind=8), dimension(time_steps) :: time_list 
-    integer (kind=8), parameter :: num_of_simulations = 50000
-    complex (kind=8), parameter :: Omega = 2.3
-    real (kind=8), parameter :: pi = 3.14159265358979323846
+    integer (kind=8), parameter :: num_of_simulations = 1000d0 
+    complex (kind=8), parameter :: Omega = 2.3d0 
+    real (kind=8), parameter :: pi = 3.14159265358979323846d0 
     real (kind=8) :: total, rand_num 
     integer :: beginning, end, rate, t, sim, index 
     complex (kind=8) :: g_0, e_0, g_1, e_1, g_2, e_2
@@ -26,16 +26,14 @@ program main
     real (kind=8), dimension(time_steps) :: rand_list 
 
     ! sigma z, lowering, raising 
-    real (kind=8), dimension(time_steps) :: avg_sigma_z_list, avg_sigma_L_list, avg_sigma_R_list
+    real (kind=8), dimension(time_steps) :: avg_sigma_z_list, avg_sigma_L_list, avg_sigma_R_list, g2
 
     ! Start running code 
 
     print *, dt 
     
     ! Initialise arrays 
-    avg_sigma_L_list = 0; avg_sigma_R_list = 0; avg_sigma_z_list = 0
-    
-    coeffs = 0; coeffs(1) = 1
+    avg_sigma_L_list = 0.0d0; avg_sigma_R_list = 0.0d0; avg_sigma_z_list = 0.0d0; g2 = 0.0d0 
 
     ! Initialise time list array 
     call linspace(start=start_time, end=end_time, time_list=time_list)
@@ -46,8 +44,8 @@ program main
     do sim = 1, num_of_simulations
 
         ! INITIALISE ARRAYS HERE AND CLEAR ARRAYS HERE 
-        coeffs = 0; coeffs(1) = 1
-        g_0_new = 0; e_0_new = 0; g_1_new = 0; e_1_new = 0
+        coeffs = 0.0d0; coeffs(1) = 1.0d0 
+        g_0_new = 0.0d0; e_0_new = 0.0d0; g_1_new = 0.0d0; e_1_new = 0.0d0
 
         call random_number(rand_list)
 
@@ -82,11 +80,13 @@ program main
             if (rand_num <= 2 * modulo_func(g_1_new)**2) then 
 
                 ! Update the sigma z list 
-                avg_sigma_z_list(t) = avg_sigma_z_list(t) - 1.0
+                avg_sigma_z_list(t) = avg_sigma_z_list(t) - 1.0d0 
+
+                g2(t) = g2(t) + (g_0_new * e_0_new)
                 
                 ! update coeffs list 
-                coeffs = 0
-                coeffs(1) = 1.0
+                coeffs = 0.0d0
+                coeffs(1) = 1.0d0 
 
             else
 
@@ -101,8 +101,10 @@ program main
                 avg_sigma_L_list(t) = avg_sigma_L_list(t) + complex_multiply(conjg(g_0_new),e_0_new)
                 avg_sigma_R_list(t) = avg_sigma_R_list(t) + complex_multiply(conjg(e_0_new),g_0_new)
 
+                g2(t) = g2(t) + (g_0_new * e_0_new)
+
                 ! Update coeffs list 
-                coeffs = 0 
+                coeffs = 0.0d0 
                 coeffs(1) = g_0_new 
                 coeffs(2) = e_0_new  
 
@@ -117,16 +119,19 @@ program main
     avg_sigma_z_list = avg_sigma_z_list / num_of_simulations
     avg_sigma_L_list = avg_sigma_L_list / num_of_simulations
     avg_sigma_R_list = avg_sigma_R_list / num_of_simulations
+    g2 = g2 / num_of_simulations
 
     !!! Write out final results to a txt file 
     open(1, file="sigma_z.txt", status="replace")
     open(2, file="sigma_L.txt", status="replace")
     open(3, file="sigma_R.txt", status="replace")   
+    open(4, file="g2.txt", status="replace")
 
     do index = 1,size(time_list)
         write(1,*) time_list(index), avg_sigma_z_list(index)
         write(2,*) time_list(index), avg_sigma_L_list(index)
         write(3,*) time_list(index), avg_sigma_R_list(index)
+        write(4,*) time_list(index), g2(index)
     end do 
 
     close(1); close(2); close(3)
